@@ -5002,10 +5002,380 @@ footer {
 
 @media (max-width: 768px) {
     .toast-notification {
-        right: 12px;
         left: 12px;
+        right: 12px;
         min-width: auto;
         max-width: none;
     }
+}
+
+/* ============================================
+   SCROLL-TRIGGERED REVEAL ANIMATIONS
+   ============================================ */
+
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+}
+
+.reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.reveal-left {
+    opacity: 0;
+    transform: translateX(-50px);
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+}
+
+.reveal-left.revealed {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.reveal-right {
+    opacity: 0;
+    transform: translateX(50px);
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+}
+
+.reveal-right.revealed {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.reveal-scale {
+    opacity: 0;
+    transform: scale(0.92);
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+}
+
+.reveal-scale.revealed {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.reveal-fade {
+    opacity: 0;
+    transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity;
+}
+
+.reveal-fade.revealed {
+    opacity: 1;
+}
+
+.delay-1 { transition-delay: 0.1s; }
+.delay-2 { transition-delay: 0.2s; }
+.delay-3 { transition-delay: 0.3s; }
+.delay-4 { transition-delay: 0.4s; }
+.delay-5 { transition-delay: 0.5s; }
+.delay-6 { transition-delay: 0.6s; }
+
+/* ============================================
+   RESPONSIVE: TABLET LANDSCAPE (max-width: 1024px)
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .perfume-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-lg, 24px);
+    }
+
+    .hero-features {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-md, 20px);
+    }
+
+    .reseller-packages {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .reseller-packages .featured-package {
+        grid-column: 1 / -1;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .social-links-container {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-lg, 24px);
+    }
+
+    .faq-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-lg, 24px);
+    }
+
+    .footer-content {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-2xl, 48px);
+    }
+
+    .section-header-main h2,
+    .perfumes .section-header-main h2 {
+        font-size: 2.2rem;
+    }
+
+    .similar-products-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .instagram-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ============================================
+   RESPONSIVE: TABLET PORTRAIT (max-width: 768px)
+   Adjustments for existing breakpoint
+   ============================================ */
+
+@media (max-width: 768px) {
+    .hero-features {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-sm, 12px);
+    }
+
+    .feature-item {
+        padding: var(--space-md, 16px);
+    }
+
+    .feature-item h4 {
+        font-size: 0.95rem;
+    }
+
+    .feature-item p {
+        font-size: 0.82rem;
+    }
+
+    .reseller-packages {
+        grid-template-columns: 1fr;
+    }
+
+    .social-links-container {
+        grid-template-columns: 1fr;
+        gap: var(--space-md, 16px);
+    }
+
+    .faq-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: var(--space-xl, 32px);
+    }
+
+    .perfume-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-md, 16px);
+    }
+
+    .section-header-main h2,
+    .perfumes .section-header-main h2 {
+        font-size: 1.75rem;
+    }
+
+    .section-header-main p,
+    .perfumes .section-header-main p {
+        font-size: 0.9rem;
+    }
+
+    .instagram-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .similar-products-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ============================================
+   RESPONSIVE: SMALL PHONES (max-width: 480px)
+   ============================================ */
+
+@media (max-width: 480px) {
+    .hero {
+        min-height: 80vh;
+        padding: 60px 16px 40px;
+    }
+
+    .hero-title {
+        font-size: 1.6rem;
+    }
+
+    .hero-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .hero-cta-group {
+        flex-direction: column;
+        gap: var(--space-sm, 12px);
+    }
+
+    .hero-cta-group .btn {
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
+
+    .hero-stats {
+        flex-direction: column;
+        gap: var(--space-md, 16px);
+    }
+
+    .stat-divider {
+        width: 40px;
+        height: 1px;
+    }
+
+    .hero-features {
+        grid-template-columns: 1fr;
+    }
+
+    .perfume-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-md, 16px);
+    }
+
+    .perfume-card {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .reseller-packages {
+        grid-template-columns: 1fr;
+    }
+
+    .package-card {
+        padding: var(--space-lg, 24px);
+    }
+
+    .social-links-container {
+        grid-template-columns: 1fr;
+    }
+
+    .faq-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-header-main h2,
+    .perfumes .section-header-main h2 {
+        font-size: 1.5rem;
+    }
+
+    .filter-container {
+        flex-direction: column;
+    }
+
+    .filter-group {
+        min-width: 100%;
+    }
+
+    .results-info {
+        flex-direction: column;
+        gap: var(--space-sm, 8px);
+        text-align: center;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--space-xs, 4px);
+    }
+
+    .instagram-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-sm, 8px);
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .footer-section h4 {
+        margin-bottom: var(--space-sm, 8px);
+    }
+
+    .contact-info p {
+        font-size: 0.85rem;
+    }
+
+    .newsletter-form input {
+        font-size: 16px;
+    }
+
+    .newsletter-form button {
+        width: 100%;
+        padding: 12px;
+    }
+
+    .promo-content h2 {
+        font-size: 1.3rem;
+    }
+
+    .promo-content p {
+        font-size: 0.85rem;
+    }
+
+    .chat-widget {
+        width: calc(100% - 24px);
+        left: 12px;
+    }
+
+    .chat-bot-btn {
+        right: 12px;
+        bottom: 80px;
+    }
+
+    .quick-actions-menu {
+        right: 12px;
+    }
+
+    .toast-notification {
+        left: 8px;
+        right: 8px;
+    }
+}
+
+/* ============================================
+   RESPONSIVE: LARGE DESKTOP (min-width: 1200px)
+   ============================================ */
+
+@media (min-width: 1200px) {
+    .perfume-grid {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .hero {
+        min-height: 90vh;
+    }
+
+    .hero-features {
+        max-width: 1100px;
+    }
+
+    .reseller-packages {
+        max-width: 1100px;
+    }
+
+    .faq-grid {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+}
 }
 

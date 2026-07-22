@@ -2437,3 +2437,47 @@ if (isMobileDevice() && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
 }
 
 console.log('📱 Mobile optimizations loaded!');
+
+// ============================================
+// SCROLL-TRIGGERED REVEAL ANIMATIONS
+// ============================================
+
+(function initScrollReveals() {
+    if (!('IntersectionObserver' in window)) return;
+
+    const revealElements = document.querySelectorAll('[data-reveal]');
+    if (!revealElements.length) return;
+
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                const revealType = el.getAttribute('data-reveal') || 'up';
+                const delay = el.getAttribute('data-reveal-delay');
+
+                let cssClass = 'reveal';
+                if (revealType === 'left') cssClass = 'reveal-left';
+                else if (revealType === 'right') cssClass = 'reveal-right';
+                else if (revealType === 'scale') cssClass = 'reveal-scale';
+                else if (revealType === 'fade') cssClass = 'reveal-fade';
+
+                el.classList.add(cssClass);
+
+                if (delay) el.classList.add('delay-' + delay);
+
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        el.classList.add('revealed');
+                    });
+                });
+
+                revealObserver.unobserve(el);
+            }
+        });
+    }, {
+        threshold: 0.12,
+        rootMargin: '0px 0px -60px 0px'
+    });
+
+    revealElements.forEach(el => revealObserver.observe(el));
+})();
