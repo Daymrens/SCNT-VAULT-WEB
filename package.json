@@ -1,0 +1,14 @@
+{
+  "name": "scnt-vault-migration",
+  "version": "1.0.0",
+  "description": "Migration script for WinForms data to Firestore",
+  "type": "module",
+  "scripts": {
+    "migrate": "node migrate-simple.js",
+    "migrate-admin": "node migrate-winforms-data.js"
+  },
+  "dependencies": {
+    "firebase": "^10.14.1",
+    "firebase-admin": "^12.7.0"
+  }
+}

@@ -1,0 +1,56 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Products Collection
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Suppliers Collection
+    match /suppliers/{supplierId} {
+      allow read: if true;
+      allow write: if true; // Temporary for migration
+    }
+    
+    // Customers Collection
+    match /customers/{customerId} {
+      allow read: if true;
+      allow write: if true; // Temporary for migration
+    }
+    
+    // Resellers Collection
+    match /resellers/{resellerId} {
+      allow read: if true;
+      allow write: if true; // Temporary for migration
+    }
+    
+    // Sales Collection
+    match /sales/{saleId} {
+      allow read: if true;
+      allow write: if true; // Temporary for migration
+    }
+    
+    // Purchase Orders Collection
+    match /purchaseOrders/{orderId} {
+      allow read: if true;
+      allow write: if true; // Temporary for migration
+    }
+    
+    // Testers Collection
+    match /testers/{testerId} {
+      allow read: if true;
+      allow write: if true; // Temporary for migration
+    }
+    
+    // Orders Collection (legacy)
+    match /orders/{orderId} {
+      allow create: if true;
+      allow read: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+  }
+}

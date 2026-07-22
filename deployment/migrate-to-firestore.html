@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migrate Data to Firestore - SCNT Vault</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+            border-left: 4px solid #1976d2;
+        }
+        .status.success {
+            background: #e8f5e9;
+            color: #388e3c;
+            border-left: 4px solid #388e3c;
+        }
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #c62828;
+        }
+        .status.warning {
+            background: #fff3e0;
+            color: #f57c00;
+            border-left: 4px solid #f57c00;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .progress {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+        }
+        .log-entry.success { color: #388e3c; }
+        .log-entry.error { color: #c62828; }
+        .log-entry.info { color: #1976d2; }
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Firestore Migration Tool</h1>
+        <p class="subtitle">Upload perfumes data to Firebase Firestore</p>
+
+        <div id="connectionStatus" class="status info">
+            ⏳ Checking Firebase connection...
+        </div>
+
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-number" id="totalPerfumes">0</div>
+                <div class="stat-label">Total Perfumes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="uploadedCount">0</div>
+                <div class="stat-label">Uploaded</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="failedCount">0</div>
+                <div class="stat-label">Failed</div>
+            </div>
+        </div>
+
+        <div class="progress" id="progressContainer" style="display: none;">
+            <div class="progress-bar" id="progressBar">0%</div>
+        </div>
+
+        <div class="actions">
+            <button id="uploadBtn" onclick="startMigration()" disabled>
+                📤 Upload Perfumes to Firestore
+            </button>
+            <button id="testBtn" onclick="testConnection()">
+                🔌 Test Connection
+            </button>
+            <button id="fetchBtn" onclick="fetchPerfumes()" disabled>
+                📥 Fetch from Firestore
+            </button>
+            <button onclick="clearLog()">
+                🗑️ Clear Log
+            </button>
+        </div>
+
+        <div class="log" id="log"></div>
+    </div>
+
+    <script type="module">
+        import { uploadPerfumesData, getAllPerfumes, checkFirestoreConnection } from './firebase-service.js';
+        import { perfumesData } from './perfumes-data.js';
+
+        let isConnected = false;
+
+        // Make functions global
+        window.startMigration = startMigration;
+        window.testConnection = testConnection;
+        window.fetchPerfumes = fetchPerfumes;
+        window.clearLog = clearLog;
+
+        // Initialize
+        async function init() {
+            log('🚀 Initializing migration tool...', 'info');
+            await testConnection();
+        }
+
+        async function testConnection() {
+            log('🔌 Testing Firestore connection...', 'info');
+            const statusDiv = document.getElementById('connectionStatus');
+            
+            try {
+                isConnected = await checkFirestoreConnection();
+                
+                if (isConnected) {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✅ Connected to Firestore successfully!';
+                    document.getElementById('uploadBtn').disabled = false;
+                    document.getElementById('fetchBtn').disabled = false;
+                    log('✅ Firestore connection successful', 'success');
+                    
+                    // Show stats
+                    document.getElementById('stats').style.display = 'grid';
+                    document.getElementById('totalPerfumes').textContent = perfumesData.length;
+                } else {
+                    throw new Error('Connection test failed');
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Failed to connect to Firestore. Check console for details.';
+                log('❌ Connection failed: ' + error.message, 'error');
+                isConnected = false;
+            }
+        }
+
+        async function startMigration() {
+            if (!isConnected) {
+                alert('Please test connection first!');
+                return;
+            }
+
+            if (!confirm(`Upload ${perfumesData.length} perfumes to Firestore?\n\nThis will add new documents to the 'perfumes' collection.`)) {
+                return;
+            }
+
+            const uploadBtn = document.getElementById('uploadBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const uploadedCountEl = document.getElementById('uploadedCount');
+            const failedCountEl = document.getElementById('failedCount');
+
+            uploadBtn.disabled = true;
+            progressContainer.style.display = 'block';
+            
+            log('📤 Starting migration...', 'info');
+            log(`📊 Total perfumes to upload: ${perfumesData.length}`, 'info');
+
+            try {
+                let uploaded = 0;
+                let failed = 0;
+
+                // Upload in batches
+                const batchSize = 10;
+                for (let i = 0; i < perfumesData.length; i += batchSize) {
+                    const batch = perfumesData.slice(i, i + batchSize);
+                    
+                    try {
+                        await uploadPerfumesData(batch);
+                        uploaded += batch.length;
+                        
+                        const progress = Math.round((uploaded / perfumesData.length) * 100);
+                        progressBar.style.width = progress + '%';
+                        progressBar.textContent = progress + '%';
+                        uploadedCountEl.textContent = uploaded;
+                        
+                        log(`✅ Uploaded batch ${Math.floor(i/batchSize) + 1}: ${batch.length} perfumes`, 'success');
+                    } catch (error) {
+                        failed += batch.length;
+                        failedCountEl.textContent = failed;
+                        log(`❌ Failed to upload batch: ${error.message}`, 'error');
+                    }
+                }
+
+                if (failed === 0) {
+                    log(`🎉 Migration complete! ${uploaded} perfumes uploaded successfully!`, 'success');
+                    alert(`✅ Success!\n\n${uploaded} perfumes uploaded to Firestore.`);
+                } else {
+                    log(`⚠️ Migration complete with errors. ${uploaded} succeeded, ${failed} failed.`, 'error');
+                    alert(`⚠️ Partial success\n\n${uploaded} uploaded\n${failed} failed`);
+                }
+
+            } catch (error) {
+                log('❌ Migration failed: ' + error.message, 'error');
+                alert('Migration failed! Check the log for details.');
+            } finally {
+                uploadBtn.disabled = false;
+            }
+        }
+
+        async function fetchPerfumes() {
+            if (!isConnected) {
+                alert('Please test connection first!');
+                return;
+            }
+
+            log('📥 Fetching perfumes from Firestore...', 'info');
+
+            try {
+                const perfumes = await getAllPerfumes();
+                log(`✅ Fetched ${perfumes.length} perfumes from Firestore`, 'success');
+                
+                if (perfumes.length > 0) {
+                    log('📋 Sample perfume:', 'info');
+                    log(JSON.stringify(perfumes[0], null, 2), 'info');
+                }
+                
+                alert(`✅ Found ${perfumes.length} perfumes in Firestore`);
+            } catch (error) {
+                log('❌ Failed to fetch perfumes: ' + error.message, 'error');
+                alert('Failed to fetch perfumes! Check the log for details.');
+            }
+        }
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            log('🗑️ Log cleared', 'info');
+        }
+
+        // Auto-initialize
+        init();
+    </script>
+</body>
+</html>

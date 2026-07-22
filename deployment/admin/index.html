@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCNT Vault - Admin Panel</title>
+    <link rel="stylesheet" href="assets/admin-styles.css">
+</head>
+<body>
+    <div id="app">
+        <div class="login-container" id="loginContainer">
+            <div class="login-card">
+                <h1>🔐 SCNT Vault Admin</h1>
+                <p>Sign in to access the admin panel</p>
+                <form id="loginForm">
+                    <input type="email" id="email" placeholder="Email" required>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <button type="submit" class="btn-primary">Sign In</button>
+                </form>
+                <p class="error-message" id="errorMessage"></p>
+            </div>
+        </div>
+
+        <div class="admin-container" id="adminContainer" style="display: none;">
+            <nav class="sidebar">
+                <div class="sidebar-header">
+                    <h2>SCNT Vault</h2>
+                    <p class="user-email" id="userEmail"></p>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#dashboard" class="nav-link active" data-page="dashboard">📊 Dashboard</a></li>
+                    <li><a href="#products" class="nav-link" data-page="products">🧴 Products</a></li>
+                    <li><a href="#orders" class="nav-link" data-page="orders">🛒 Orders</a></li>
+                    <li><a href="#contacts" class="nav-link" data-page="contacts">✉️ Contacts</a></li>
+                    <li><a href="#customers" class="nav-link" data-page="customers">👥 Customers</a></li>
+                    <li><a href="#analytics" class="nav-link" data-page="analytics">📈 Analytics</a></li>
+                    <li><a href="#settings" class="nav-link" data-page="settings">⚙️ Settings</a></li>
+                </ul>
+                <button class="btn-logout" id="logoutBtn">🚪 Logout</button>
+            </nav>
+
+            <main class="main-content">
+                <header class="top-bar">
+                    <h1 id="pageTitle">Dashboard</h1>
+                    <div class="top-bar-actions">
+                        <button class="btn-icon" title="Notifications">🔔</button>
+                        <button class="btn-icon" title="Settings">⚙️</button>
+                    </div>
+                </header>
+
+                <div class="content-area" id="contentArea">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script type="module" src="api/firebase-admin.js"></script>
+    <script type="module" src="assets/admin-app.js"></script>
+</body>
+</html>
