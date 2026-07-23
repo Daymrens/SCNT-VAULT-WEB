@@ -14,7 +14,13 @@
     <nav class="navbar">
         <div class="container">
             <div class="logo">SCNT Vault</div>
-            <button class="mobile-menu-toggle" id="mobileMenuToggle">☰</button>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="22" height="22">
+                    <line class="hamburger-line top" x1="3" y1="6" x2="21" y2="6"/>
+                    <line class="hamburger-line middle" x1="3" y1="12" x2="21" y2="12"/>
+                    <line class="hamburger-line bottom" x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
             <ul class="nav-links" id="navLinks">
                 <li><a href="#home">Home</a></li>
                 <li><a href="#perfumes">Perfumes</a></li>
@@ -27,6 +33,7 @@
             </ul>
         </div>
     </nav>
+    <div class="mobile-menu-backdrop" id="mobileMenuBackdrop"></div>
 
     <section id="home" class="hero">
         <div class="hero-overlay"></div>
@@ -661,12 +668,12 @@
     </div>
 
     <script src="perfumes-data.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
     <!-- Firebase SDK - Optional, loads asynchronously -->
     <script type="module" src="firebase-loader.js"></script>
     
     <!-- Main Script -->
-    <script src="script.js"></script>
+    <script defer src="script.js"></script>
 </body>
 </html>

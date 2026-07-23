@@ -41,7 +41,7 @@ function displayPerfumes(perfumes, page = 1) {
         
         // Use specific image if available, otherwise use default
         const imagePath = perfume.ImagePath || 'images/scnt_default.png';
-        const imageHtml = `<div class="perfume-image" style="background-image: url('${imagePath}'); background-size: cover; background-position: center;"></div>`;
+        const imageHtml = `<div class="perfume-image lazy-load" data-src="${imagePath}" style="background-size: cover; background-position: center;"></div>`;
         
         card.innerHTML = `
             ${imageHtml}
@@ -62,6 +62,16 @@ function displayPerfumes(perfumes, page = 1) {
         
         // Add badges after card is added to DOM
         addProductBadges(perfume);
+        
+        // Lazy load the image
+        const imgEl = card.querySelector('.perfume-image.lazy-load');
+        if (imgEl && window.imageObserver) {
+            window.imageObserver.observe(imgEl);
+        } else if (imgEl) {
+            // Fallback: load immediately
+            imgEl.style.backgroundImage = `url('${imagePath}')`;
+            imgEl.classList.add('loaded');
+        }
     });
     
     updatePagination(perfumes.length, page);
@@ -415,15 +425,45 @@ if (contactForm) {
     });
 }
 
-// Add scroll effect to navbar
+// Consolidated scroll handler with throttle
+let lastScrollTime = 0;
 window.addEventListener('scroll', function() {
+    const now = Date.now();
+    if (now - lastScrollTime < 16) return; // ~60fps throttle
+    lastScrollTime = now;
+    
+    const scrollY = window.scrollY;
+    
+    // Navbar scroll effect
     const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 50) {
+    if (scrollY > 50) {
         navbar.classList.add('scrolled');
     } else {
         navbar.classList.remove('scrolled');
     }
-});
+    
+    // Quick actions menu visibility
+    const quickActionsMenu = document.getElementById('quickActionsMenu');
+    if (quickActionsMenu) {
+        if (scrollY > 500) {
+            quickActionsMenu.classList.add('active');
+        } else {
+            quickActionsMenu.classList.remove('active');
+        }
+    }
+    
+    // Floating quiz button visibility
+    const floatingQuizBtn = document.getElementById('floatingQuizBtn');
+    if (floatingQuizBtn) {
+        if (scrollY > 300) {
+            floatingQuizBtn.style.opacity = '1';
+            floatingQuizBtn.style.pointerEvents = 'auto';
+        } else {
+            floatingQuizBtn.style.opacity = '0';
+            floatingQuizBtn.style.pointerEvents = 'none';
+        }
+    }
+}, { passive: true });
 
 function showNotification(message) {
     // Remove any existing notifications first
@@ -579,17 +619,39 @@ viewButtons.forEach(btn => {
 // Mobile menu toggle
 const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 const navLinks = document.getElementById('navLinks');
+const mobileMenuBackdrop = document.getElementById('mobileMenuBackdrop');
+
+function closeMobileMenu() {
+    navLinks.classList.remove('active');
+    mobileMenuToggle.classList.remove('active');
+    if (mobileMenuBackdrop) mobileMenuBackdrop.classList.remove('active');
+}
 
 if (mobileMenuToggle && navLinks) {
     mobileMenuToggle.addEventListener('click', function() {
+        const isOpening = !navLinks.classList.contains('active');
         navLinks.classList.toggle('active');
+        mobileMenuToggle.classList.toggle('active');
+        if (mobileMenuBackdrop) mobileMenuBackdrop.classList.toggle('active');
+        
+        // Prevent body scroll when menu is open
+        if (isOpening) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
     });
+}
+
+// Close mobile menu on backdrop click
+if (mobileMenuBackdrop) {
+    mobileMenuBackdrop.addEventListener('click', closeMobileMenu);
 }
 
 // Close mobile menu when clicking a link
 document.querySelectorAll('.nav-links a').forEach(link => {
     link.addEventListener('click', function() {
-        navLinks.classList.remove('active');
+        closeMobileMenu();
     });
 });
 
@@ -740,187 +802,7 @@ function hideLoadingSpinner() {
     }
 }
 
-// Comparison feature
-let compareList = [];
-const maxCompare = 3;
 
-function toggleCompare(event, perfumeName) {
-    event.stopPropagation();
-    
-    const perfumesData = window.perfumesData || [];
-    const perfume = perfumesData.find(p => p.Name === perfumeName);
-    if (!perfume) return;
-    
-    const index = compareList.findIndex(p => p.Name === perfumeName);
-    const button = event.currentTarget;
-    
-    if (index > -1) {
-        // Remove from comparison
-        compareList.splice(index, 1);
-        button.classList.remove('active');
-        showNotification(`${perfumeName} removed from comparison`);
-    } else {
-        // Add to comparison
-        if (compareList.length >= maxCompare) {
-            showNotification(`You can only compare up to ${maxCompare} items`);
-            return;
-        }
-        compareList.push(perfume);
-        button.classList.add('active');
-        showNotification(`${perfumeName} added to comparison`);
-    }
-    
-    updateCompareBar();
-}
-
-function updateCompareBar() {
-    const compareBar = document.getElementById('compareBar');
-    const compareItems = document.getElementById('compareItems');
-    const compareCount = document.getElementById('compareCount');
-    
-    compareCount.textContent = compareList.length;
-    
-    if (compareList.length > 0) {
-        compareBar.classList.add('active');
-        
-        compareItems.innerHTML = compareList.map(item => {
-            const img = item.ImagePath || 'images/scnt_default.png';
-            return `
-                <div class="compare-item">
-                    <div class="compare-item-image" style="background-image: url('${img}')"></div>
-                    <span class="compare-item-name">${item.Name}</span>
-                    <button class="remove-compare" onclick="removeFromCompare('${item.Name}')" title="Remove">×</button>
-                </div>
-            `;
-        }).join('');
-    } else {
-        compareBar.classList.remove('active');
-    }
-}
-
-function removeFromCompare(perfumeName) {
-    compareList = compareList.filter(item => item.Name !== perfumeName);
-    updateCompareBar();
-    
-    // Update button state
-    const buttons = document.querySelectorAll('.compare-btn');
-    buttons.forEach(btn => {
-        if (btn.onclick && btn.onclick.toString().includes(perfumeName)) {
-            btn.classList.remove('active');
-        }
-    });
-}
-
-function clearComparison() {
-    compareList = [];
-    updateCompareBar();
-    
-    // Remove active state from all compare buttons
-    document.querySelectorAll('.compare-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    showNotification('Comparison cleared');
-}
-
-function showComparisonModal() {
-    if (compareList.length < 2) {
-        showNotification('Please select at least 2 items to compare');
-        return;
-    }
-    
-    const modal = document.getElementById('comparisonModal');
-    const content = document.getElementById('comparisonContent');
-    
-    // Build comparison table
-    const notes = compareList.map(p => getScentNotes(p));
-    
-    let html = '<div class="comparison-table-wrapper"><table class="comparison-table">';
-    
-    // Header row with product images and names
-    html += '<tr class="comparison-header"><th class="feature-column">Feature</th>';
-    compareList.forEach((item, index) => {
-        const img = item.ImagePath || 'images/scnt_default.png';
-        html += `
-            <th class="product-column">
-                <div class="comparison-product-header">
-                    <div class="comparison-product-image" style="background-image: url('${img}')"></div>
-                    <h3>${item.Name}</h3>
-                    <p class="comparison-brand">${item.Brand}</p>
-                </div>
-            </th>
-        `;
-    });
-    html += '</tr>';
-    
-    // Feature rows
-    const features = [
-        { label: 'Price', key: 'SellingPrice', format: (v) => `₱${v}` },
-        { label: 'Category', key: 'Category' },
-        { label: 'Gender', key: 'Gender' },
-        { label: 'Size', key: 'Size' },
-        { label: 'Top Notes', key: 'topNotes', isNote: true },
-        { label: 'Heart Notes', key: 'middleNotes', isNote: true },
-        { label: 'Base Notes', key: 'baseNotes', isNote: true }
-    ];
-    
-    features.forEach(feature => {
-        html += `<tr><td class="feature-label">${feature.label}</td>`;
-        compareList.forEach((item, index) => {
-            let value;
-            if (feature.isNote) {
-                value = notes[index][feature.key === 'topNotes' ? 'top' : feature.key === 'middleNotes' ? 'middle' : 'base'];
-            } else {
-                value = item[feature.key];
-            }
-            
-            if (feature.format) {
-                value = feature.format(value);
-            }
-            
-            html += `<td class="feature-value">${value}</td>`;
-        });
-        html += '</tr>';
-    });
-    
-    html += '</table></div>';
-    
-    // Add action buttons for each product
-    html += '<div class="comparison-product-actions">';
-    compareList.forEach(item => {
-        html += `
-            <div class="comparison-action-item">
-                <button class="btn" onclick="viewProductFromComparison('${item.Name}')">View Details</button>
-            </div>
-        `;
-    });
-    html += '</div>';
-    
-    content.innerHTML = html;
-    modal.style.display = 'block';
-}
-
-function closeComparisonModal() {
-    document.getElementById('comparisonModal').style.display = 'none';
-}
-
-function viewProductFromComparison(perfumeName) {
-    const perfumesData = window.perfumesData || [];
-    const perfume = perfumesData.find(p => p.Name === perfumeName);
-    if (perfume) {
-        closeComparisonModal();
-        const imagePath = perfume.ImagePath || 'images/scnt_default.png';
-        openModal(perfume, imagePath);
-    }
-}
-
-// Close comparison modal
-document.addEventListener('DOMContentLoaded', function() {
-    const closeComparison = document.querySelector('.close-comparison');
-    if (closeComparison) {
-        closeComparison.addEventListener('click', closeComparisonModal);
-    }
-});
 
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
@@ -945,11 +827,15 @@ if ('IntersectionObserver' in window) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const img = entry.target;
-                img.style.backgroundImage = img.dataset.src;
+                const src = img.dataset.src;
+                if (src) {
+                    img.style.backgroundImage = `url('${src}')`;
+                    img.classList.add('loaded');
+                }
                 observer.unobserve(img);
             }
         });
-    });
+    }, { rootMargin: '200px' }); // Start loading 200px before visible
     
     // This will be applied when images are created
     window.imageObserver = imageObserver;
@@ -974,6 +860,12 @@ window.addEventListener('DOMContentLoaded', function() {
         currentView = searchPreferences.lastView;
         document.querySelector(`[data-view="${currentView}"]`)?.click();
     }
+    
+    // Add view count tracking
+    let viewCount = parseInt(localStorage.getItem('siteViews') || '0');
+    viewCount++;
+    localStorage.setItem('siteViews', viewCount);
+    console.log(`🎉 Welcome back! You've visited ${viewCount} time(s)`);
 });
 
 // Save preferences when they change
@@ -1181,18 +1073,6 @@ document.querySelectorAll('.quick-reply').forEach(btn => {
 
 // Quick Actions Menu
 const quickActionsMenu = document.getElementById('quickActionsMenu');
-let quickActionsVisible = false;
-
-// Toggle quick actions on scroll
-window.addEventListener('scroll', function() {
-    if (window.scrollY > 500 && !quickActionsVisible) {
-        quickActionsMenu.classList.add('active');
-        quickActionsVisible = true;
-    } else if (window.scrollY <= 500 && quickActionsVisible) {
-        quickActionsMenu.classList.remove('active');
-        quickActionsVisible = false;
-    }
-});
 
 const quickChat = document.getElementById('quickChat');
 
@@ -1202,44 +1082,7 @@ if (quickChat && chatWidget) {
     });
 }
 
-// Update applyFilters to include new filters
-const originalApplyFilters = applyFilters;
-applyFilters = function() {
-    const perfumesData = window.perfumesData || [];
-    filteredPerfumes = perfumesData.filter(perfume => {
-        const categoryMatch = currentCategory === 'all' || perfume.Gender === currentCategory;
-        
-        let searchMatch = true;
-        if (currentSearchTerm) {
-            const name = perfume.Name.toLowerCase();
-            const brand = perfume.Brand.toLowerCase();
-            const category = perfume.Category.toLowerCase();
-            const gender = perfume.Gender.toLowerCase();
-            const term = currentSearchTerm.toLowerCase();
-            
-            searchMatch = name.includes(term) || brand.includes(term) || 
-                         category.includes(term) || gender.includes(term);
-        }
-        
-        return categoryMatch && searchMatch;
-    });
-    
-    applySorting();
-    updateResultsCount();
-    
-    currentPage = 1;
-    displayPerfumes(filteredPerfumes, currentPage);
-};
 
-// Initialize everything on load
-window.addEventListener('DOMContentLoaded', function() {
-    // Add view count tracking
-    let viewCount = parseInt(localStorage.getItem('siteViews') || '0');
-    viewCount++;
-    localStorage.setItem('siteViews', viewCount);
-    
-    console.log(`🎉 Welcome back! You've visited ${viewCount} time(s)`);
-});
 
 // Analytics tracking (simple version)
 function trackEvent(eventName, eventData) {
@@ -1349,15 +1192,6 @@ if (closeQuiz) {
 }
 if (retakeQuizBtn) {
     retakeQuizBtn.addEventListener('click', startQuiz);
-}
-
-function startQuiz() {
-    currentQuizQuestion = 0;
-    quizAnswers = [];
-    quizContainer.style.display = 'block';
-    quizResults.style.display = 'none';
-    quizModal.style.display = 'block';
-    showQuizQuestion();
 }
 
 function startQuiz() {
@@ -1793,30 +1627,17 @@ function initializeFAQ() {
     console.log('✅ FAQ initialized with', document.querySelectorAll('.faq-question').length, 'questions');
 }
 
-// Initialize on page load
+// Initialize cart and features on page load
 window.addEventListener('DOMContentLoaded', function() {
     updateRecentlyViewedDisplay();
-    initializeFAQ(); // Initialize FAQ accordion
+    initializeFAQ();
+    console.log('🛒 Initializing cart system...');
+    updateCartUI();
+    initializeCartButtons();
+    initializeCheckoutHandlers();
 });
 
 console.log('✨ Scent Quiz, Similar Products, Recently Viewed, and FAQ features loaded!');
-
-// Show/hide floating quiz button based on scroll position
-window.addEventListener('scroll', function() {
-    const floatingQuizBtn = document.getElementById('floatingQuizBtn');
-    if (!floatingQuizBtn) return;
-    
-    const scrollPosition = window.scrollY;
-    
-    // Show button after scrolling down a bit
-    if (scrollPosition > 300) {
-        floatingQuizBtn.style.opacity = '1';
-        floatingQuizBtn.style.pointerEvents = 'auto';
-    } else {
-        floatingQuizBtn.style.opacity = '0';
-        floatingQuizBtn.style.pointerEvents = 'none';
-    }
-});
 
 console.log('🎯 Featured Quiz section loaded!');
 
@@ -2050,50 +1871,6 @@ function openCheckoutForm() {
     checkoutModal.style.display = 'block';
 }
 
-// Global function for checkout (fallback for onclick)
-window.openCheckout = function() {
-    if (cart.length === 0) {
-        showNotification('Your cart is empty!');
-        return;
-    }
-    
-    const totals = calculateCartTotals();
-    
-    toggleCartPanel();
-    
-    const itemList = cart.map(item => `${item.Name} × ${item.quantity}`).join(', ');
-    const totalText = `₱${totals.total.toFixed(2)}`;
-    
-    const popup = document.createElement('div');
-    popup.className = 'invoice-popup-overlay';
-    popup.innerHTML = `
-        <div class="invoice-popup">
-            <div class="invoice-popup-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="48" height="48">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                    <polyline points="10 9 9 9 8 9"/>
-                </svg>
-            </div>
-            <h3>Order Pending</h3>
-            <p class="invoice-popup-total">Total: <strong>${totalText}</strong></p>
-            <p class="invoice-popup-message">Thank you for your order! The seller will send you an official invoice receipt via <strong>Email</strong> or <strong>Messenger</strong>.</p>
-            <p class="invoice-popup-sub">Please wait while we prepare your invoice. You will receive it shortly.</p>
-            <p class="invoice-popup-delivery">Delivery fee varies depending on your location — this will be included in your invoice.</p>
-            <div class="invoice-popup-items">${itemList}</div>
-            <button class="invoice-popup-close">Got it</button>
-        </div>
-    `;
-    document.body.appendChild(popup);
-    
-    popup.querySelector('.invoice-popup-close').addEventListener('click', function() {
-        popup.remove();
-        openCheckoutForm();
-    });
-};
-
 // Checkout Functions - moved inside initialization
 function initializeCheckoutHandlers() {
     const closeCheckout = document.querySelector('.close-checkout');
@@ -2219,14 +1996,6 @@ function initializeCheckoutHandlers() {
     console.log('✅ Checkout handlers initialized');
 }
 
-// Initialize cart on page load
-window.addEventListener('DOMContentLoaded', function() {
-    console.log('🛒 Initializing cart system...');
-    updateCartUI();
-    initializeCartButtons();
-    initializeCheckoutHandlers();
-});
-
 console.log('🛒 Shopping cart feature loaded successfully!');
 
 // ===== MOBILE OPTIMIZATIONS =====
@@ -2250,48 +2019,7 @@ function preventBodyScroll(prevent) {
 }
 
 // Update checkout modal for mobile
-const checkoutBtn = document.getElementById('checkoutBtn');
-const originalCheckoutClick = checkoutBtn.onclick;
-
-checkoutBtn.onclick = function() {
-    if (cart.length === 0) {
-        showNotification('Your cart is empty!');
-        return;
-    }
-    
-    const checkoutModal = document.getElementById('checkoutModal');
-    const checkoutItems = document.getElementById('checkoutItems');
-    
-    // Populate checkout items
-    checkoutItems.innerHTML = cart.map(item => `
-        <div class="checkout-item">
-            <span>${item.Name} × ${item.quantity}</span>
-            <span>₱${(parseFloat(item.SellingPrice) * item.quantity).toFixed(2)}</span>
-        </div>
-    `).join('');
-    
-    // Update totals
-    const totals = calculateCartTotals();
-    document.getElementById('checkoutSubtotal').textContent = `₱${totals.subtotal.toFixed(2)}`;
-    document.getElementById('checkoutShipping').textContent = totals.shipping === 0 ? 'FREE' : `₱${totals.shipping.toFixed(2)}`;
-    document.getElementById('checkoutTotal').textContent = `₱${totals.total.toFixed(2)}`;
-    
-    checkoutModal.style.display = 'block';
-    toggleCartPanel(); // Close cart panel
-    
-    // Prevent body scroll on mobile
-    if (isMobileDevice()) {
-        preventBodyScroll(true);
-    }
-    
-    // Focus first input on desktop
-    if (!isMobileDevice()) {
-        setTimeout(() => {
-            const firstInput = checkoutModal.querySelector('input');
-            if (firstInput) firstInput.focus();
-        }, 300);
-    }
-};
+// (checkout button handlers are managed by initializeCartButtons)
 
 // Close modals on outside click (desktop only)
 if (!isMobileDevice()) {

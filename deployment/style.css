@@ -1882,15 +1882,57 @@ footer {
     background: transparent;
     border: 1.5px solid var(--color-text-inverse);
     color: var(--color-text-inverse);
-    font-size: 1.2rem;
-    padding: 6px 14px;
+    padding: 8px;
     cursor: pointer;
     transition: all var(--duration-fast) var(--ease-out);
     border-radius: var(--radius-sm);
+    line-height: 0;
 }
 
 .mobile-menu-toggle:hover {
     background: rgba(255,255,255,0.1);
+}
+
+.mobile-menu-toggle svg {
+    display: block;
+}
+
+.hamburger-line {
+    transition: all 0.3s var(--ease-out);
+    transform-origin: center;
+}
+
+.mobile-menu-toggle.active .hamburger-line.top {
+    transform: translateY(6px) rotate(45deg);
+}
+
+.mobile-menu-toggle.active .hamburger-line.middle {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.mobile-menu-toggle.active .hamburger-line.bottom {
+    transform: translateY(-6px) rotate(-45deg);
+}
+
+/* Mobile Menu Backdrop */
+.mobile-menu-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 998;
+    opacity: 0;
+    transition: opacity 0.3s var(--ease-out);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-menu-backdrop.active {
+    display: block;
+    opacity: 1;
 }
 
 /* View Toggle */
@@ -2272,7 +2314,11 @@ footer {
 /* Responsive Design */
 @media (max-width: 768px) {
     .mobile-menu-toggle {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
     }
     
     .nav-links {
@@ -2298,8 +2344,17 @@ footer {
     .nav-links li {
         width: 100%;
         text-align: center;
-        padding: 0.75rem 0;
+        padding: 0;
         border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    
+    .nav-links li a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 12px 16px;
+        font-size: 1rem;
     }
     
     .perfume-grid.list-view .perfume-card {
@@ -5082,6 +5137,16 @@ footer {
 .delay-5 { transition-delay: 0.5s; }
 .delay-6 { transition-delay: 0.6s; }
 
+/* Lazy Load Fade-In for Images */
+.lazy-load {
+    opacity: 0;
+    transition: opacity 0.4s var(--ease-out);
+}
+
+.lazy-load.loaded {
+    opacity: 1;
+}
+
 /* ============================================
    RESPONSIVE: TABLET LANDSCAPE (max-width: 1024px)
    ============================================ */
@@ -5226,8 +5291,9 @@ footer {
 
     .hero-cta-group .btn {
         width: 100%;
-        padding: 12px 20px;
-        font-size: 0.9rem;
+        padding: 14px 20px;
+        font-size: 0.95rem;
+        min-height: 48px;
     }
 
     .hero-stats {
@@ -5254,6 +5320,10 @@ footer {
         margin: 0 auto;
     }
 
+    .btn, button {
+        min-height: 44px;
+    }
+
     .reseller-packages {
         grid-template-columns: 1fr;
     }
@@ -5262,12 +5332,26 @@ footer {
         padding: var(--space-lg, 24px);
     }
 
+    .package-btn {
+        width: 100%;
+        min-height: 48px;
+    }
+
     .social-links-container {
         grid-template-columns: 1fr;
     }
 
+    .social-link {
+        min-height: 48px;
+    }
+
     .faq-grid {
         grid-template-columns: 1fr;
+    }
+
+    .faq-question {
+        min-height: 48px;
+        padding: 14px 16px;
     }
 
     .section-header-main h2,
@@ -5283,6 +5367,11 @@ footer {
         min-width: 100%;
     }
 
+    .search-bar {
+        font-size: 16px;
+        min-height: 48px;
+    }
+
     .results-info {
         flex-direction: column;
         gap: var(--space-sm, 8px);
@@ -5293,6 +5382,11 @@ footer {
         flex-wrap: wrap;
         justify-content: center;
         gap: var(--space-xs, 4px);
+    }
+
+    .pagination-btn {
+        min-height: 44px;
+        padding: 10px 16px;
     }
 
     .instagram-grid {
@@ -5313,13 +5407,26 @@ footer {
         font-size: 0.85rem;
     }
 
+    .contact-form input,
+    .contact-form textarea {
+        font-size: 16px;
+        min-height: 48px;
+    }
+
+    .contact-form .btn {
+        width: 100%;
+        min-height: 48px;
+    }
+
     .newsletter-form input {
         font-size: 16px;
+        min-height: 48px;
     }
 
     .newsletter-form button {
         width: 100%;
         padding: 12px;
+        min-height: 48px;
     }
 
     .promo-content h2 {
@@ -5347,6 +5454,17 @@ footer {
     .toast-notification {
         left: 8px;
         right: 8px;
+    }
+
+    .checkout-form input,
+    .checkout-form textarea {
+        font-size: 16px;
+        min-height: 48px;
+    }
+
+    .place-order-btn {
+        width: 100%;
+        min-height: 48px;
     }
 }
 
