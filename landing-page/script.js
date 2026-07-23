@@ -13,26 +13,14 @@ let cart = JSON.parse(localStorage.getItem('cart')) || [];
 let currentPerfumeInModal = null;
 
 // Load and display perfumes
-function displayPerfumes(perfumes, page = 1) {
-    console.log('🎨 displayPerfumes called with', perfumes.length, 'perfumes, page', page);
+function displayPerfumes(perfumes, page = 1) {const perfumeGrid = document.getElementById('perfumeGrid');
     
-    const perfumeGrid = document.getElementById('perfumeGrid');
-    
-    if (!perfumeGrid) {
-        console.error('❌ perfumeGrid element not found!');
-        return;
-    }
-    
-    console.log('✅ perfumeGrid found');
-    perfumeGrid.innerHTML = '';
+    if (!perfumeGrid) {return;
+    }perfumeGrid.innerHTML = '';
     
     const startIndex = (page - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const perfumesToShow = perfumes.slice(startIndex, endIndex);
-    
-    console.log('📄 Showing perfumes', startIndex, 'to', endIndex, '=', perfumesToShow.length, 'items');
-    
-    perfumesToShow.forEach(perfume => {
+    const perfumesToShow = perfumes.slice(startIndex, endIndex);perfumesToShow.forEach(perfume => {
         const card = document.createElement('div');
         card.className = 'perfume-card';
         card.setAttribute('data-name', perfume.Name);
@@ -273,16 +261,8 @@ if (nextBtn) {
 }
 
 // Load perfumes when page loads
-window.addEventListener('DOMContentLoaded', function() {
-    console.log('🌸 DOM Content Loaded');
-    
-    // Access perfumesData from global scope (window)
-    const perfumesData = window.perfumesData;
-    console.log('📦 Perfumes Data:', typeof perfumesData !== 'undefined' ? perfumesData.length + ' items' : 'NOT LOADED');
-    
-    if (typeof perfumesData === 'undefined') {
-        console.error('❌ perfumesData is not defined!');
-        const grid = document.getElementById('perfumeGrid');
+window.addEventListener('DOMContentLoaded', function() {// Access perfumesData from global scope (window)
+    const perfumesData = window.perfumesData;if (typeof perfumesData === '') {const grid = document.getElementById('perfumeGrid');
         if (grid) {
             grid.innerHTML = '<p style="text-align: center; color: red; padding: 40px;">Error: Perfumes data not loaded. Please refresh the page.</p>';
         }
@@ -293,13 +273,8 @@ window.addEventListener('DOMContentLoaded', function() {
     window.perfumesData = perfumesData;
     
     // Sort alphabetically by name (A to Z) by default
-    filteredPerfumes = [...perfumesData].sort((a, b) => a.Name.localeCompare(b.Name));
-    console.log('🔄 Filtered Perfumes:', filteredPerfumes.length, '(sorted A-Z)');
-    
-    displayPerfumes(filteredPerfumes, currentPage);
-    updatePagination(filteredPerfumes.length, currentPage);
-    console.log('✅ displayPerfumes called');
-});
+    filteredPerfumes = [...perfumesData].sort((a, b) => a.Name.localeCompare(b.Name));displayPerfumes(filteredPerfumes, currentPage);
+    updatePagination(filteredPerfumes.length, currentPage);});
 
 // Modal event listeners
 document.querySelectorAll('.close-modal').forEach(closeBtn => {
@@ -329,7 +304,7 @@ const EMAILJS_CONFIG = {
 
 // Initialize EmailJS
 (function() {
-    if (typeof emailjs !== 'undefined' && EMAILJS_CONFIG.publicKey !== 'YOUR_PUBLIC_KEY') {
+    if (typeof emailjs !== '' && EMAILJS_CONFIG.publicKey !== 'YOUR_PUBLIC_KEY') {
         emailjs.init(EMAILJS_CONFIG.publicKey);
     }
 })();
@@ -351,20 +326,7 @@ if (contactForm) {
         // Check if EmailJS is configured
         if (EMAILJS_CONFIG.publicKey === 'YOUR_PUBLIC_KEY') {
             // Fallback: Show alert if EmailJS not configured
-            alert('Thank you for your message! We will get back to you soon.\n\nNote: Email functionality needs to be configured. See console for instructions.');
-            console.log('%c📧 EMAIL SETUP REQUIRED', 'color: #ff6b6b; font-size: 16px; font-weight: bold;');
-            console.log('%cTo enable real email sending:', 'color: #4ecdc4; font-size: 14px;');
-            console.log('1. Go to https://www.emailjs.com/');
-            console.log('2. Create a free account');
-            console.log('3. Add an email service (Gmail, Outlook, etc.)');
-            console.log('4. Create an email template');
-            console.log('5. Get your Service ID, Template ID, and Public Key');
-            console.log('6. Replace the values in EMAILJS_CONFIG in script.js');
-            console.log('%cTemplate variables to use:', 'color: #4ecdc4; font-size: 14px;');
-            console.log('{{from_name}} - Sender name');
-            console.log('{{from_email}} - Sender email');
-            console.log('{{subject}} - Email subject');
-            console.log('{{message}} - Email message');
+            alert('Thank you for your message! We will get back to you soon.');
             form.reset();
             return;
         }
@@ -392,16 +354,11 @@ if (contactForm) {
         };
         
         // Save to Firebase if available
-        const saveContact = window.saveContactMessage || (async () => {
-            console.log('⚠️ Firebase not available - contact not saved to database');
-            return 'local-' + Date.now();
+        const saveContact = window.saveContactMessage || (async () => {return 'local-' + Date.now();
         });
         
         saveContact(contactData)
-            .then((contactId) => {
-                console.log('✅ Contact saved to Firebase:', contactId);
-                
-                // Then send email using EmailJS
+            .then((contactId) => {// Then send email using EmailJS
                 return emailjs.send(EMAILJS_CONFIG.serviceID, EMAILJS_CONFIG.templateID, templateParams);
             })
             .then(function(response) {
@@ -410,18 +367,13 @@ if (contactForm) {
                 submitBtn.textContent = originalBtnText;
                 
                 showNotification('✅ Message sent successfully! We\'ll get back to you soon.');
-                form.reset();
-                
-                console.log('Email sent successfully!', response.status, response.text);
-            })
+                form.reset();})
             .catch(function(error) {
                 hideLoadingSpinner();
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalBtnText;
                 
-                showNotification('❌ Failed to send message. Please try again or email us directly.');
-                console.error('Error:', error);
-            });
+                showNotification('❌ Failed to send message. Please try again or email us directly.');});
     });
 }
 
@@ -767,23 +719,17 @@ if (newsletterForm) {
         showLoadingSpinner();
     
         // Subscribe to newsletter if Firebase available
-        const subscribe = window.subscribeNewsletter || (async () => {
-            console.log('⚠️ Firebase not available - subscription not saved to database');
-            return 'local-' + Date.now();
+        const subscribe = window.subscribeNewsletter || (async () => {return 'local-' + Date.now();
         });
         
         subscribe(email)
             .then((subscriptionId) => {
                 hideLoadingSpinner();
-                showNotification('✅ Successfully subscribed to newsletter!');
-                console.log('✅ Newsletter subscription saved:', subscriptionId);
-                this.reset();
+                showNotification('✅ Successfully subscribed to newsletter!');this.reset();
             })
             .catch((error) => {
                 hideLoadingSpinner();
-                showNotification('❌ Failed to subscribe. Please try again.');
-                console.error('Newsletter subscription error:', error);
-            });
+                showNotification('❌ Failed to subscribe. Please try again.');});
     });
 }
 
@@ -801,8 +747,6 @@ function hideLoadingSpinner() {
         spinner.classList.remove('active');
     }
 }
-
-
 
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
@@ -864,18 +808,12 @@ window.addEventListener('DOMContentLoaded', function() {
     // Add view count tracking
     let viewCount = parseInt(localStorage.getItem('siteViews') || '0');
     viewCount++;
-    localStorage.setItem('siteViews', viewCount);
-    console.log(`🎉 Welcome back! You've visited ${viewCount} time(s)`);
-});
+    localStorage.setItem('siteViews', viewCount);});
 
 // Save preferences when they change
 document.getElementById('perfumeSearch').addEventListener('input', saveSearchPreferences);
 document.getElementById('categoryFilter').addEventListener('change', saveSearchPreferences);
-document.getElementById('sortFilter').addEventListener('change', saveSearchPreferences);
-
-console.log('🌸 SCNT Vault - All features loaded successfully!');
-
-// Advanced Filters
+document.getElementById('sortFilter').addEventListener('change', saveSearchPreferences);// Advanced Filters
 // Voice Search
 const voiceSearchBtn = document.getElementById('voiceSearchBtn');
 
@@ -916,73 +854,6 @@ if (voiceSearchBtn) {
     } else {
         voiceSearchBtn.style.display = 'none';
     }
-}
-
-// Featured Carousel
-function initializeFeaturedCarousel() {
-    const featuredCarousel = document.getElementById('featuredCarousel');
-    
-    if (!featuredCarousel) {
-        console.warn('Featured carousel element not found');
-        return;
-    }
-    
-    const perfumesData = window.perfumesData || [];
-    if (!perfumesData || perfumesData.length === 0) {
-        console.warn('No perfumes data available for carousel');
-        return;
-    }
-    
-    const featured = perfumesData.slice(0, 6); // Get first 6 items
-    
-    featuredCarousel.innerHTML = featured.map(perfume => {
-        const imagePath = perfume.ImagePath || 'images/scnt_default.png';
-        return `
-            <div class="perfume-card" style="min-width: 280px;">
-                <div class="perfume-badge new">NEW</div>
-                <div class="perfume-image" style="background-image: url('${imagePath}'); background-size: cover; background-position: center;"></div>
-                <h3>${perfume.Name}</h3>
-                <p class="brand">${perfume.Brand}</p>
-                <p class="category">${perfume.Category}</p>
-                <p class="price">₱${perfume.SellingPrice}</p>
-            </div>
-        `;
-    }).join('');
-    
-    // Add click handlers
-    featuredCarousel.querySelectorAll('.perfume-card').forEach((card, index) => {
-        card.addEventListener('click', () => {
-            const perfume = featured[index];
-            const imagePath = perfume.ImagePath || 'images/scnt_default.png';
-            if (typeof openModal === 'function') {
-                openModal(perfume, imagePath);
-            }
-        });
-    });
-    
-    console.log('✅ Featured carousel initialized with', featured.length, 'items');
-}
-
-const carouselPrev = document.getElementById('carouselPrev');
-const carouselNext = document.getElementById('carouselNext');
-const featuredCarousel = document.getElementById('featuredCarousel');
-
-if (carouselPrev && featuredCarousel) {
-    carouselPrev.addEventListener('click', function() {
-        featuredCarousel.scrollBy({ left: -300, behavior: 'smooth' });
-    });
-    console.log('✅ Carousel prev button initialized');
-} else {
-    console.warn('⚠️ Carousel prev button or carousel not found');
-}
-
-if (carouselNext && featuredCarousel) {
-    carouselNext.addEventListener('click', function() {
-        featuredCarousel.scrollBy({ left: 300, behavior: 'smooth' });
-    });
-    console.log('✅ Carousel next button initialized');
-} else {
-    console.warn('⚠️ Carousel next button or carousel not found');
 }
 
 // Chat Bot
@@ -1082,23 +953,13 @@ if (quickChat && chatWidget) {
     });
 }
 
-
-
 // Analytics tracking (simple version)
-function trackEvent(eventName, eventData) {
-    console.log('Event:', eventName, eventData);
-    // In production, send to analytics service
+function trackEvent(eventName, eventData) {// In production, send to analytics service
 }
 
 // Performance monitoring
 window.addEventListener('load', function() {
-    const loadTime = performance.now();
-    console.log(`⚡ Page loaded in ${loadTime.toFixed(2)}ms`);
-});
-
-console.log('🚀 All advanced features loaded successfully!');
-
-// ===== SCENT QUIZ FEATURE =====
+    const loadTime = performance.now();});// ===== SCENT QUIZ FEATURE =====
 const quizQuestions = [
     {
         question: "What's your name or nickname?",
@@ -1532,9 +1393,7 @@ function updateRecentlyViewedDisplay() {
     const section = document.getElementById('recentlyViewedSection');
     const grid = document.getElementById('recentlyViewedGrid');
     
-    if (!section || !grid) {
-        console.warn('Recently viewed section not found');
-        return;
+    if (!section || !grid) {return;
     }
     
     if (recentlyViewed.length === 0) {
@@ -1623,25 +1482,15 @@ function initializeFAQ() {
                 faqItem.classList.add('active');
             }
         });
-    });
-    console.log('✅ FAQ initialized with', document.querySelectorAll('.faq-question').length, 'questions');
-}
+    });}
 
 // Initialize cart and features on page load
 window.addEventListener('DOMContentLoaded', function() {
     updateRecentlyViewedDisplay();
-    initializeFAQ();
-    console.log('🛒 Initializing cart system...');
-    updateCartUI();
+    initializeFAQ();updateCartUI();
     initializeCartButtons();
     initializeCheckoutHandlers();
-});
-
-console.log('✨ Scent Quiz, Similar Products, Recently Viewed, and FAQ features loaded!');
-
-console.log('🎯 Featured Quiz section loaded!');
-
-// ===== SHOPPING CART FEATURE =====
+});// ===== SHOPPING CART FEATURE =====
 
 // Cart Functions
 function addToCart(perfume, quantity = 1) {
@@ -1692,9 +1541,7 @@ function updateCartUI() {
     const cartItems = document.getElementById('cartItems');
     const cartSummary = document.getElementById('cartSummary');
     
-    if (!cartItems || !cartSummary) {
-        console.error('❌ Cart UI elements not found');
-        return;
+    if (!cartItems || !cartSummary) {return;
     }
     
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -1763,33 +1610,23 @@ function initializeCartButtons() {
     const checkoutBtn = document.getElementById('checkoutBtn');
     
     if (cartBtn) {
-        cartBtn.addEventListener('click', toggleCartPanel);
-        console.log('✅ Cart button initialized');
-    } else {
-        console.error('❌ Cart button not found');
-    }
+        cartBtn.addEventListener('click', toggleCartPanel);} else {}
     
     if (navCartBtn) {
         navCartBtn.addEventListener('click', function(e) {
             e.preventDefault();
             toggleCartPanel();
-        });
-        console.log('✅ Nav cart button initialized');
-    }
+        });}
     
     if (closeCart) {
-        closeCart.addEventListener('click', toggleCartPanel);
-        console.log('✅ Close cart button initialized');
-    }
+        closeCart.addEventListener('click', toggleCartPanel);}
     
     if (addToCartModal) {
         addToCartModal.addEventListener('click', function() {
             if (currentPerfumeInModal) {
                 addToCart(currentPerfumeInModal);
             }
-        });
-        console.log('✅ Add to cart modal button initialized');
-    }
+        });}
     
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', function(e) {
@@ -1840,11 +1677,7 @@ function initializeCartButtons() {
                 popup.remove();
                 openCheckoutForm();
             });
-        });
-        console.log('✅ Checkout button initialized');
-    } else {
-        console.error('❌ Checkout button not found');
-    }
+        });} else {}
 }
 
 // Helper to open the checkout form modal
@@ -1892,11 +1725,7 @@ function initializeCheckoutHandlers() {
     
     // Check if EmailJS is configured
     if (EMAILJS_CONFIG.publicKey === 'YOUR_PUBLIC_KEY') {
-        alert('Thank you for your order! We will contact you shortly.\n\nNote: Email functionality needs to be configured. See console for instructions.');
-        console.log('%c📧 EMAIL SETUP REQUIRED', 'color: #ff6b6b; font-size: 16px; font-weight: bold;');
-        console.log('%cTo enable real email sending, configure EmailJS in script.js', 'color: #4ecdc4; font-size: 14px;');
-        
-        // Clear cart and close modal
+        alert('Thank you for your order! We will contact you shortly.');        // Clear cart and close modal
         cart = [];
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartUI();
@@ -1953,16 +1782,11 @@ function initializeCheckoutHandlers() {
     };
     
     // Save order to Firebase first (if available)
-    const saveOrder = window.createOrder || (async () => {
-        console.log('⚠️ Firebase not available - order not saved to database');
-        return 'local-' + Date.now();
+    const saveOrder = window.createOrder || (async () => {return 'local-' + Date.now();
     });
     
     saveOrder(orderData)
-        .then((orderId) => {
-            console.log('✅ Order saved to Firebase:', orderId);
-            
-            // Then send email using EmailJS
+        .then((orderId) => {// Then send email using EmailJS
             return emailjs.send(EMAILJS_CONFIG.serviceID, 'template_6g4lf87', templateParams);
         })
         .then(function(response) {
@@ -1978,27 +1802,15 @@ function initializeCheckoutHandlers() {
             updateCartUI();
             
             form.reset();
-            document.getElementById('checkoutModal').style.display = 'none';
-            
-            console.log('Order email sent successfully!', response.status, response.text);
-        })
+            document.getElementById('checkoutModal').style.display = 'none';})
         .catch(function(error) {
             hideLoadingSpinner();
             submitBtn.disabled = false;
             submitBtn.textContent = originalBtnText;
             
-            showNotification('❌ Failed to place order. Please try again or contact us directly.');
-            console.error('Error:', error);
-        });
+            showNotification('❌ Failed to place order. Please try again or contact us directly.');});
     });
-    }
-    
-    console.log('✅ Checkout handlers initialized');
-}
-
-console.log('🛒 Shopping cart feature loaded successfully!');
-
-// ===== MOBILE OPTIMIZATIONS =====
+    }}// ===== MOBILE OPTIMIZATIONS =====
 
 // Detect mobile device
 function isMobileDevice() {
@@ -2162,11 +1974,7 @@ if (isMobileDevice() && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
         }
     `;
     document.head.appendChild(style);
-}
-
-console.log('📱 Mobile optimizations loaded!');
-
-// ============================================
+}// ============================================
 // SCROLL-TRIGGERED REVEAL ANIMATIONS
 // ============================================
 
